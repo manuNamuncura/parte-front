@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* 1. Definimos el comportamiento del tema oscuro */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Colores personalizados (opcional) */
+  --color-brand-primary: #3b82f6;
+}
+
+/* 2. Reseteo base para asegurar que el fondo cambie */
+@layer base {
+  html {
+    /* Esto ayuda a que el scrollbar y colores del sistema se adapten */
+    color-scheme: light;
+  }
+  
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply antialiased;
+  }
+}
+
+/* 3. Utilidades de transición global */
+@layer utilities {
+  .transition-theme {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+}
