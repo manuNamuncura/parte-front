@@ -3,6 +3,7 @@ import type { CreateObraDto, Obra, ObrasResponse } from "../types/obra";
 
 const API_URL = '/api/obras';
 
+//Obtener todas las obras.
 export const useObras = (page = 1, limit = 10) => {
     return useQuery<ObrasResponse>({
         queryKey: ['obras', { page, limit }],
@@ -14,6 +15,7 @@ export const useObras = (page = 1, limit = 10) => {
     });
 };
 
+//Crear una obra.
 export const useCreateObra = () => {
     const queryClient = useQueryClient();
 
@@ -32,3 +34,49 @@ export const useCreateObra = () => {
         },
     });
 };
+
+//Obtener una obra.
+export const useObra = (id: string) => {
+    return useQuery<Obra>({
+        queryKey: ['obras', id],
+        queryFn: async () => {
+            const response = await fetch(`${API_URL}/${id}`);
+            if (!response.ok) throw new Error('Obra no encontrada');
+            return response.json();
+        },
+        enabled: !!id,
+    });
+};
+
+//Actualizar Obra.
+export const useUpdateObra = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: Partial<CreateObraDto> }) => {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            return response.json();
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['obras'] });
+            queryClient.invalidateQueries({ queryKey: ['obras', data.id] });
+        },
+    });
+};
+
+//Eliminar Obra.
+export const useDeleteObra = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            return response.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['obras'] });
+        }
+    })
+}

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Dialog } from "./ui/Dialog";
-import { FormNuevaObra } from "./obras/FormNuevaObra";
+import { FormObra } from "./obras/FormNuevaObra";
 import { useObras } from "../hooks/useObras";
-import { HardHat, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
+import { HardHat, Plus, MapPin, Calendar, Loader2, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const ListaObras = () => {
   const { data, isLoading, isError } = useObras();
@@ -34,33 +35,43 @@ export const ListaObras = () => {
             </button>
           }
         >
-          <FormNuevaObra onSuccess={() => setIsDialogOpen(false)} />
+          <FormObra onSuccess={() => setIsDialogOpen(false)} />
         </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data?.data.map((obra) => (
-          <div
+          <Link
             key={obra.id}
-            className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+            to="/obras/$id"
+            params={{ id: obra.id }}
+            className="group p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer"
           >
-            <h3 className="font-bold text-lg mb-2 dark:text-slate-100">
-              {obra.nombre}
-            </h3>
+            <div className="flex justify-between items-start">
+              <h3 className="font-bold text-lg mb-2 dark:text-slate-100 group-hover:text-blue-600 transition-colors">
+                {obra.nombre}
+              </h3>
+              <ArrowRight
+                size={18}
+                className="text-slate-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"
+              />
+            </div>
+
             <p className="text-slate-500 text-sm flex items-center gap-1 mb-1">
               <MapPin size={14} /> {obra.direccion}
             </p>
             <p className="text-slate-400 text-xs flex items-center gap-1">
-              <Calendar size={14} />{" "}
+              <Calendar size={14} />
               {new Date(obra.fechaInicio).toLocaleDateString()}
             </p>
+
             <div className="mt-4 pt-4 border-t dark:border-slate-800 flex justify-between items-center text-xs">
               <span className="text-blue-500 font-medium">{obra.cliente}</span>
               <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">
                 {obra.partes?.length || 0} Partes
               </span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

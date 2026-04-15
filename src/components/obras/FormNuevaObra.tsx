@@ -1,12 +1,21 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { obraSchema, type ObraFormData } from "../../schemas/obras";
-import { useCreateObra } from "../../hooks/useObras";
-import { Loader2, AlertCircle } from "lucide-react";
+import { useCreateObra, useUpdateObra } from "../../hooks/useObras"; // Importamos el update
+import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import type { Obra } from "../../types/obra";
 
-export const FormNuevaObra = ({ onSuccess }: { onSuccess: () => void }) => {
-  const mutation = useCreateObra();
+interface Props {
+  onSuccess: () => void;
+  obraParaEditar?: Obra; // Propiedad opcional para modo edición
+}
+
+export const FormObra = ({ onSuccess, obraParaEditar }: Props) => {
+  const createMutation = useCreateObra();
+  const updateMutation = useUpdateObra();
+
+  const isEditing = !!obraParaEditar;
 
   const {
     register,
@@ -14,17 +23,36 @@ export const FormNuevaObra = ({ onSuccess }: { onSuccess: () => void }) => {
     formState: { errors },
   } = useForm<ObraFormData>({
     resolver: zodResolver(obraSchema),
+
+    defaultValues: obraParaEditar
+      ? {
+          nombre: obraParaEditar.nombre,
+          cliente: obraParaEditar.cliente,
+          direccion: obraParaEditar.direccion,
+
+          fechaInicio: obraParaEditar.fechaInicio.split("T")[0],
+          fechaFin: obraParaEditar.fechaFin.split("T")[0],
+        }
+      : {},
   });
 
   const onSubmit = (data: ObraFormData) => {
-    mutation.mutate(data, {
-      onSuccess: () => onSuccess(),
-    });
+    if (isEditing && obraParaEditar) {
+      updateMutation.mutate(
+        { id: obraParaEditar.id, data },
+        { onSuccess: () => onSuccess() },
+      );
+    } else {
+      createMutation.mutate(data, {
+        onSuccess: () => onSuccess(),
+      });
+    }
   };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Campo Nombre */}
       <div className="space-y-1">
         <label className="text-sm font-medium dark:text-slate-300">
           Nombre de la Obra
@@ -32,61 +60,39 @@ export const FormNuevaObra = ({ onSuccess }: { onSuccess: () => void }) => {
         <input
           {...register("nombre")}
           className={cn(
-            "w-full p-2 rounded-lg border bg-transparent dark:text-white outline-none transition-all",
+            "w-full p-2 rounded-lg border bg-transparent dark:text-white outline-none",
             errors.nombre
-              ? "border-red-500 focus:ring-red-500/20"
+              ? "border-red-500"
               : "border-slate-200 dark:border-slate-800 focus:ring-blue-500",
           )}
         />
         {errors.nombre && (
-          <p className="text-xs text-red-500 flex items-center gap-1">
-            <AlertCircle size={12} /> {errors.nombre.message}
-          </p>
+          <p className="text-xs text-red-500">{errors.nombre.message}</p>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Campo Cliente */}
         <div className="space-y-1">
           <label className="text-sm font-medium dark:text-slate-300">
             Cliente
           </label>
           <input
             {...register("cliente")}
-            className={cn(
-              "w-full p-2 rounded-lg border bg-transparent dark:text-white outline-none",
-              errors.cliente
-                ? "border-red-500"
-                : "border-slate-200 dark:border-slate-800",
-            )}
+            className="w-full p-2 rounded-lg border dark:border-slate-800 bg-transparent dark:text-white"
           />
-          {errors.cliente && (
-            <p className="text-xs text-red-500">{errors.cliente.message}</p>
-          )}
         </div>
-
-        {/* Campo Dirección */}
         <div className="space-y-1">
           <label className="text-sm font-medium dark:text-slate-300">
             Dirección
           </label>
           <input
             {...register("direccion")}
-            className={cn(
-              "w-full p-2 rounded-lg border bg-transparent dark:text-white outline-none",
-              errors.direccion
-                ? "border-red-500"
-                : "border-slate-200 dark:border-slate-800",
-            )}
+            className="w-full p-2 rounded-lg border dark:border-slate-800 bg-transparent dark:text-white"
           />
-          {errors.direccion && (
-            <p className="text-xs text-red-500">{errors.direccion.message}</p>
-          )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Fechas */}
         <div className="space-y-1">
           <label className="text-sm font-medium dark:text-slate-300">
             Inicio
@@ -96,32 +102,26 @@ export const FormNuevaObra = ({ onSuccess }: { onSuccess: () => void }) => {
             {...register("fechaInicio")}
             className="w-full p-2 rounded-lg border dark:border-slate-800 bg-transparent dark:text-white"
           />
-          {errors.fechaInicio && (
-            <p className="text-xs text-red-500">{errors.fechaInicio.message}</p>
-          )}
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-medium dark:text-slate-300">
-            Fin esperado
-          </label>
+          <label className="text-sm font-medium dark:text-slate-300">Fin</label>
           <input
             type="date"
             {...register("fechaFin")}
             className="w-full p-2 rounded-lg border dark:border-slate-800 bg-transparent dark:text-white"
           />
-          {errors.fechaFin && (
-            <p className="text-xs text-red-500">{errors.fechaFin.message}</p>
-          )}
         </div>
       </div>
 
       <button
         type="submit"
-        disabled={mutation.isPending}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all disabled:opacity-50 flex justify-center items-center gap-2 mt-2"
+        disabled={isPending}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all flex justify-center items-center gap-2"
       >
-        {mutation.isPending ? (
+        {isPending ? (
           <Loader2 className="animate-spin" size={20} />
+        ) : isEditing ? (
+          "Actualizar Obra"
         ) : (
           "Guardar Obra"
         )}
