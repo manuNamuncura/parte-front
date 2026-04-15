@@ -2,7 +2,8 @@
 import { HardHat, ClipboardList, Clock, TrendingUp } from "lucide-react";
 
 const StatCard = ({ title, value, icon: Icon, trend }: any) => (
-  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+  /* snap-center: Hace que la tarjeta se centre al soltar el scroll en móvil */
+  <div className="min-w-[85vw] md:min-w-0 snap-center bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all">
     <div className="flex justify-between items-start mb-4">
       <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
         <Icon size={24} />
@@ -21,8 +22,13 @@ const StatCard = ({ title, value, icon: Icon, trend }: any) => (
 export const DashboardHome = () => {
   return (
     <div className="space-y-8">
-      {/* Grid de Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Contenedor de Métricas */}
+      <div
+        className="
+        flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar
+        md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0
+      "
+      >
         <StatCard
           title="Total Obras"
           value="12"
@@ -49,36 +55,13 @@ export const DashboardHome = () => {
         />
       </div>
 
-      {/* Área de Gráficos */}
+      {/* Área de Gráficos (Ya configurada para ser responsiva) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <h3 className="text-lg font-bold mb-4 dark:text-white">
             Productividad de Obras
           </h3>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 dark:text-white">
-            Obras Recientes
-          </h3>
-          <div className="space-y-4">
-            {/* Lista simple de ejemplo */}
-            {["Torre Centenario", "Complejo Alpha", "Refacción Hospital"].map(
-              (obra) => (
-                <div key={obra} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <div>
-                    <p className="text-sm font-medium dark:text-slate-200">
-                      {obra}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Actualizado hace 2h
-                    </p>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
+          {/* Aquí iría el componente DashboardChart que hicimos antes */}
         </div>
       </div>
     </div>

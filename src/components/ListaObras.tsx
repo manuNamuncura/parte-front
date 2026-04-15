@@ -1,9 +1,12 @@
-import { useObras, useCreateObra } from "../hooks/useObras";
+import { useState } from "react";
+import { Dialog } from "./ui/Dialog";
+import { FormNuevaObra } from "./obras/FormNuevaObra";
+import { useObras } from "../hooks/useObras";
 import { HardHat, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
 
 export const ListaObras = () => {
   const { data, isLoading, isError } = useObras();
-  const createObraMutation = useCreateObra();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (isLoading)
     return <Loader2 className="animate-spin text-blue-500 mx-auto" />;
@@ -18,12 +21,21 @@ export const ListaObras = () => {
         <h2 className="text-2xl font-bold dark:text-white flex items-center gap-2">
           <HardHat /> Gestión de Obras
         </h2>
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-          disabled={createObraMutation.isPending}
+
+        <Dialog
+          title="Nueva Obra"
+          description="Completa los datos para dar de alta una nueva obra en el sistema."
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          trigger={
+            <button className="bg-blue-600 text-white p-2 md:px-4 md:py-2 rounded-lg flex items-center gap-2">
+              <Plus size={20} />
+              <span className="hidden md:inline">Nueva Obra</span>
+            </button>
+          }
         >
-          <Plus size={18} /> Nueva Obra
-        </button>
+          <FormNuevaObra onSuccess={() => setIsDialogOpen(false)} />
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
