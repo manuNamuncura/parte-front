@@ -13,12 +13,14 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "../lib/utils";
+import { FormParte } from "../components/partes/FormParte";
 
 export const DetalleObra = () => {
   const { id } = useParams({ from: "/obras/$id" });
   const { data: obra, isLoading } = useObra(id);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const deleteMutation = useDeleteObra();
+  const [isParteDialogOpen, setIsParteDialogOpen] = useState(false);
 
   if (isLoading)
     return (
@@ -98,9 +100,22 @@ export const DetalleObra = () => {
           <h2 className="text-xl font-bold dark:text-white flex items-center gap-2">
             <FileText size={22} className="text-blue-500" /> Partes Diarios
           </h2>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">
-            + Nuevo Parte
-          </button>
+          <Dialog
+            title="Registrar Parte Diario"
+            description={`Carga las tareas realizadas en: ${obra.nombre}`}
+            open={isParteDialogOpen}
+            onOpenChange={setIsParteDialogOpen}
+            trigger={
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
+                + Nuevo Parte
+              </button>
+            }
+          >
+            <FormParte
+              obraId={obra.id}
+              onSuccess={() => setIsParteDialogOpen(false)}
+            />
+          </Dialog>
         </div>
 
         <div className="grid gap-3">

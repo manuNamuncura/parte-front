@@ -3,7 +3,7 @@ export interface Parte {
     fecha: string;
     descripcion: string;
     horas: number;
-    estado: 'NORMAL' | 'RETRASO' | 'INCIDENTE'
+    estado: 'NORMAL' | 'RETRASO' | 'INCIDENTE' | 'FINALIZADO'
 }
 
 export interface Obra {
